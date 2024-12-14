@@ -13,6 +13,7 @@ class CameraOverlayScreen extends StatefulWidget {
 class _CameraOverlayScreenState extends State<CameraOverlayScreen> {
   CameraController? controller;
   late Future<void> initializeControllerFuture;
+  String? capturedImagePath;
 
   @override
   void initState() {
@@ -25,6 +26,24 @@ class _CameraOverlayScreenState extends State<CameraOverlayScreen> {
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+
+  Future<void> capturePhoto() async {
+    try {
+      await initializeControllerFuture;
+      final XFile photo = await controller!.takePicture();
+      setState(() {
+        capturedImagePath = photo.path;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Photo captured and saved to ${photo.path}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error capturing photo: $e')),
+      );
+    }
   }
 
   @override
@@ -51,39 +70,39 @@ class _CameraOverlayScreenState extends State<CameraOverlayScreen> {
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
-                      height: 190,
+                      height: 230,
                       width: double.infinity,
                       color: Colors.grey.shade200,
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 15),
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
-                                elevation: 5,
-                                shadowColor: Colors.grey,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 15, horizontal: 80),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
+                          ElevatedButton(
+                            onPressed: capturePhoto,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              elevation: 5,
+                              shadowColor: Colors.greenAccent,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 15, horizontal: 80),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
                               ),
-                              child: Text(
-                                'CONFIRM',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            ),
+                            child: Text(
+                              'CAPTURE',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
                             ),
                           ),
+                          const SizedBox(height: 10),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               foregroundColor: Colors.white,
